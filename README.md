@@ -1,8 +1,6 @@
-To prettify the module for `README.md` on GitHub, we can organize the code snippets, add headings, and format it properly. Below is the refined version:
-
 ---
 
-# USK PREPARE
+# USK PREPARATION
 
 This module is designed to facilitate book management in a library setting.
 
