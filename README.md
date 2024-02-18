@@ -1,66 +1,358 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+To prettify the module for `README.md` on GitHub, we can organize the code snippets, add headings, and format it properly. Below is the refined version:
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+# USK PREPARE
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+This module is designed to facilitate book management in a library setting.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## VIEW
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Admin Template
+SB Admin 2
 
-## Learning Laravel
+### Blade Engine
+**main.blade.php**:
+```blade
+@include('sidebar')
+@include('topbar')
+@yield('content')
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**content.blade.php**:
+```blade
+@extends('main')
+@section('content')
+<!-- Your content here -->
+@endsection
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## DATABASE
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Model/Controller
+Shortcut: `Ctrl + Shift + P` -> Make:Model
 
-## Laravel Sponsors
+#### Create DB
+Create the following tables:
+- Kategori
+- Buku
+- User
+- Pinjam
+- History (tentative)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+#### Relational DB + Migrations Examples
 
-### Premium Partners
+**Buku Model**:
+```php
+namespace App\Models;
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-## Contributing
+class Buku extends Model
+{
+    // Relationships
+    public function kategori(): BelongsTo
+    {
+        return $this->belongsTo(Kategori::class);
+    }
+}
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Buku Migration**:
+```php
+public function up(): void
+{
+    Schema::create('bukus', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('kategori_id');
+        $table->string('pengarang');
+        $table->string('penerbit');
+        $table->text('deskripsi');
+        $table->text('image')->nullable()->default('https://cdn3d.iconscout.com/3d/premium/thumb/book-5596349-4665465.png');
+        $table->text('uuid');
+        $table->integer('stok')->nullable()->default(5);
+        $table->timestamps();
+    });
+}
+```
 
-## Code of Conduct
+**Kategori Model**:
+```php
+namespace App\Models;
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-## Security Vulnerabilities
+class Kategori extends Model
+{
+    // Relationships
+    public function buku(): HasMany
+    {
+        return $this->hasMany(Buku::class);
+    }
+}
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Kategori Migration**:
+```php
+public function up(): void
+{
+    Schema::create('kategoris', function (Blueprint $table) {
+        $table->id();
+        $table->string('nama');
+        $table->timestamps();
+    });
+}
+```
 
-## License
+### Relational Structures
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+1. **Kategori**: hasMany `Buku`
+2. **Buku**: belongsTo `Kategori` && hasMany `Pinjam`
+3. **User**: hasMany `Pinjam`
+4. **Pinjam**: belongsTo `Buku` && belongsTo `User`
+
+## CRUDS
+
+### Create
+```php
+// Controller method
+public function store(StoreBukuRequest $request)
+{
+    $validated = $request->validate([
+        'judul' => 'required',
+        'pengarang' => 'required',
+        'penerbit' => 'required',
+        'kategori_id' => 'required',
+        'deskripsi' => 'required',
+        'image' => 'exclude',
+        'stok' => 'exclude'
+    ]);
+    $validated['uuid'] = Str::orderedUuid();
+    Buku::create($validated);
+
+    return redirect()->back()->with('added', 'Buku berhasil ditambahkan');
+}
+```
+
+### Read
+```php
+// Controller method
+public function index()
+{
+    return view('daftar-buku', [
+        'data' => Buku::with('kategori')->get(),
+        'select' => Kategori::all()
+    ]);
+}
+```
+
+### Update
+```php
+// Controller method
+public function update(UpdateBukuRequest $request, Buku $buku)
+{
+    $buku->update($request->all());
+    return redirect()->back()->with('saved', 'Buku berhasil di-update');
+}
+```
+
+### Delete
+```php
+// Controller method
+public function destroy(Buku $buku)
+{
+    $buku->delete();
+    return redirect()->back()->with('deleted', "Buku {$buku->judul} telah dihapus");
+}
+```
+
+### Show
+```php
+// Controller method
+public function show(Buku $buku)
+{
+    return view('pinjam-show', ['buku' => $buku]);
+}
+```
+
+## Authentication/Authorization
+
+### AuthController
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+
+class AuthController extends Controller
+{
+    public function login()
+    {
+        return view('auth.index');
+    }
+
+    public function auth(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => 'required',
+            'password' => 'required',
+        ]);
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->intended('/dashboard');
+        }
+
+        return back()->with(
+            'loginErr', 'The provided credentials do not match our records.',
+        );
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/');
+    }
+}
+```
+
+### Authorization
+
+**Make Role Middleware**:
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
+
+class Role
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next, ...$roles)
+    {
+        if (Auth::check() && in_array(Auth::user()->role, $roles)) {
+            return $next($request);
+        }
+
+        abort(401);
+    }
+}
+
+```
+
+**Kernel.php**:
+```php
+'role' => \App\Http\Middleware\Role::class
+```
+
+**Middleware Usage**:
+```php
+Route::middleware(['auth','role:pustakawan,admin'])->group(function () {
+    Route::resource('buku', BukuController::class);
+
+        Route::middleware(['auth','role:admin'])->group(function () {   
+
+        });
+});
+```
+
+## Database Seeder
+
+### DatabaseSeeder.php
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        // \App\Models\User::factory(10)->create();
+        $this->call([
+            UserSeeder::class,
+            KategoriSeeder::class,
+            BukuSeeder::class
+        ]);
+    }
+}
+```
+
+### UserSeeder.php
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+class UserSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::table('users')->insert([
+            [
+                'id' => 1,
+                'name' => 'Muhamad Pasha Albara',
+                'email' => 'pashaalbara01@gmail.com',
+                'password' => Hash::make('pasha'),
+                'phone' => '085777511106',
+                'location' => 'Jl. Nangka no. 18',
+                'about_me' => 'I code things',
+                'pustakawan' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'id' => 2,
+                'name' => 'Muhamad Hanafi',
+                'email' => 'napi@gmail.com',
+                'password' => Hash::make('pasha'),
+                'phone' => '085777511106',
+                'location' => 'Jl. Nanas no. 12',
+                'about_me' => 'Aku wibu',
+                'pustakawan' => 0,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]
+
+            ]);
+    }
+}
+```
+
+Or just use normal `User::create([]);
+
+---
+
+This README.md provides an overview of the module structure, database setup, CRUD operations, authentication, authorization, and database seeding. Feel free to use it as a reference or note.
