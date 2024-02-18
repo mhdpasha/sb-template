@@ -64,7 +64,8 @@ public function up(): void
 {
     Schema::create('bukus', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('kategori_id');
+        $table->foreignId('kategori_id')->constrained();
+        $table->string('judul');
         $table->string('pengarang');
         $table->string('penerbit');
         $table->text('deskripsi');
