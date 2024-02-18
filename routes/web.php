@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,14 +14,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/', 'login')->name('login')->middleware('guest');
+    Route::post('auth-user', 'auth')->name('auth.verif')->middleware('guest');
+    Route::post('/logout', 'logout')->name('logout');
 });
 
-Route::get('/dashboard', function () {
-    return view('pages.dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('pages.dashboard');
+    });
+    
+    Route::get('/buku', function () {
+        return view('pages.buku');
+    });
 });
 
-Route::get('/buku', function () {
-    return view('pages.buku');
+Route::middleware(['auth','role:pustakawan,admin'])->group(function () {
+    Route::get('/buku', function () {
+        return view('pages.buku');
+    });
+
+        Route::middleware(['auth','role:admin'])->group(function () {   
+
+        });
 });
